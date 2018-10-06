@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var uploadRouter = require('./routes/upload');
 var triviaGameRouter = require('./routes/triviaGame');
+var concentrationGameRouter = require('./routes/concentrationGame');
 var dashboardRouter = require('./routes/dashboard');
 
 var app = express();
@@ -53,6 +54,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/upload', uploadRouter);
 app.use('/triviaGame', triviaGameRouter);
+app.use('/concentrationGame', concentrationGameRouter);
 app.use('/dashboard', dashboardRouter);
 
 // catch 404 and forward to error handler
