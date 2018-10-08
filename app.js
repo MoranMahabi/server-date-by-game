@@ -11,7 +11,9 @@ var usersRouter = require('./routes/users');
 var uploadRouter = require('./routes/upload');
 var triviaGameRouter = require('./routes/triviaGame');
 var concentrationGameRouter = require('./routes/concentrationGame');
+var chatRouter = require('./routes/chat');
 var dashboardRouter = require('./routes/dashboard');
+
 
 var app = express();
 
@@ -56,6 +58,7 @@ app.use('/upload', uploadRouter);
 app.use('/triviaGame', triviaGameRouter);
 app.use('/concentrationGame', concentrationGameRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/chat', chatRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

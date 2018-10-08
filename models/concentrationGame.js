@@ -37,8 +37,11 @@ class ConcentrationGame {
         const hostProfile = await Profile.findOne({ uid: uidHost });
         const guestProfile = await Profile.findOne({ uid: uidGuest });
 
-        const hostImageList = this.shuffleArray(hostProfile.imageList);
-        const guestImageList = this.shuffleArray(guestProfile.imageList);
+
+        const hostImageList = hostProfile.imageList;
+        const guestImageList = guestProfile.imageList;
+        //const hostImageList = this.shuffleArray(hostProfile.imageList);
+        // const guestImageList = this.shuffleArray(guestProfile.imageList);
 
         for (let i = 0; i < 3; i++) {
             let uuid = uuidv4();
@@ -69,7 +72,8 @@ class ConcentrationGame {
             })
         }
 
-        gameConcentration.cards = this.shuffleArray(cards);
+        gameConcentration.cards = cards;
+        //gameConcentration.cards = this.shuffleArray(cards);
         gameConcentration.currentPlayerUID = uidHost;
         return gameConcentration;
     }
@@ -118,7 +122,7 @@ class ConcentrationGame {
         if (isFinish) {
             this.gameStatus = GAME_STATUS.FINISH;
         }
-      
+
         await this.save();
     }
 
@@ -129,6 +133,7 @@ class ConcentrationGame {
         const hostPlayer = {
             name: hostProfile.displayName,
             imageURL: hostProfile.imageMain,
+            age: hostProfile.age,
             uid: hostProfile.uid
         }
 
@@ -136,6 +141,7 @@ class ConcentrationGame {
         const guestPlayer = {
             name: guestProfile.displayName,
             imageURL: guestProfile.imageMain,
+            age: guestProfile.age,
             uid: guestProfile.uid
         }
 
@@ -155,6 +161,7 @@ class ConcentrationGame {
 
 const Card = new Schema(
     {
+        id: String,
         isFacingUP: { type: Boolean, default: false },
         imageURL: String
     },

@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Profile = require('../models/profile');
 const TriviaGame = require('../models/triviaGame');
 const ConcentrationGame = require('../models/concentrationGame');
+const Chat = require('../models/chat');
 
 var cors = require('cors')
 router.use(cors())
@@ -114,7 +115,39 @@ router.get('/activeGames/:uid', async function (req, res) {
             type
         })
     }
-  
+
+    res.json(result);
+});
+
+
+router.get('/chats/:uid', async function (req, res) {
+    const uid = req.params.uid;
+    const chats = await Chat.find({ $or: [{ uid1: uid }, { uid2: uid }] });
+
+    let result = [];
+
+    for (let chat of chats) {
+        const _id = chat._id;
+
+        let profile;
+        if (chat.uid1 == uid) {
+            profile = await Profile.findOne({ uid: chat.uid2 });
+        } else if (chat.uid2 == uid) {
+            profile = await Profile.findOne({ uid: chat.uid1 });
+        }
+
+        const name = profile.displayName;
+        const image = profile.imageMain;
+        const age = profile.age;
+
+        result.push({
+            _id,
+            name,
+            image,
+            age
+        })
+    }
+
     res.json(result);
 });
 
