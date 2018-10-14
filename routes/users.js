@@ -25,11 +25,7 @@ router.get('/', function (req, res, next) {
 
 router.post('/profilesDetails', async function (req, res, next) {
 
-
-  // uid: uid, city: city, from: from, to: to, page: page, pageSize: pageSize
-
-
-  const profilesDetails = []
+  const profilesUID = []
   const uid = req.params.uid;
 
   let city = req.body.city;
@@ -38,13 +34,6 @@ router.post('/profilesDetails', async function (req, res, next) {
 
   let page = req.body.page;
   let pageSize = req.body.pageSize;
-
-
-  console.log(city)
-  console.log(from)
-  console.log(to)
-  console.log(page)
-  console.log(pageSize)
 
   let query = {};
 
@@ -62,23 +51,25 @@ router.post('/profilesDetails', async function (req, res, next) {
 
   query['uid'] = { $ne: req.body.uid }
 
-  const profiles = await Profile.find(query).skip(pageSize * (page - 1)).limit(pageSize);
+  let myProfile = await Profile.findOne({ uid: req.body.uid });
+  if (myProfile) {
+    if (myProfile.seeking != '' && myProfile.seeking != null) {
+      query['gender'] = myProfile.seeking;
+    }
+  }
+
+  let profiles = await Profile.find(query);
   const total = profiles.length;
 
+  profiles = await Profile.find(query).skip(pageSize * (page - 1)).limit(pageSize);
+
   for (let profile of profiles) {
-    profilesDetails.push({
+    profilesUID.push({
       uid: profile.uid,
-      displayName: profile.displayName,
-      isOnline: profile.isOnline,
-      age: profile.age,
-      city: profile.city,
-      gender: profile.gender,
-      seeking: profile.seeking,
-      imageMain: profile.imageMain
     });
   }
 
-  res.status(200).json({ profiles: profilesDetails, total: total });
+  res.status(200).json({ profilesUID: profilesUID, total: total });
 });
 
 router.post('/updateProfile/:uid', async function (req, res, next) {
@@ -87,19 +78,27 @@ router.post('/updateProfile/:uid', async function (req, res, next) {
   res.sendStatus(200);
 });
 
+
 router.get('/profileDetails/:uid', async function (req, res, next) {
   const uid = req.params.uid;
   const profile = await Profile.findOne({ uid });
 
-  res.status(200).json({
-    displayName: profile.displayName,
-    gender: profile.gender,
-    seeking: profile.seeking,
-    age: profile.age,
-    city: profile.city,
-    imageList: profile.imageList,
-    imageMain: profile.imageMain
-  });
+  if (!profile) {
+    res.status(200).json({ isProfileExist: false });
+  } else {
+    res.status(200).json({
+      isProfileExist: true,
+      uid: profile.uid,
+      displayName: profile.displayName,
+      gender: profile.gender,
+      seeking: profile.seeking,
+      age: profile.age,
+      city: profile.city,
+      imageList: profile.imageList,
+      imageMain: profile.imageMain,
+      isOnline: profile.isOnline
+    });
+  }
 });
 
 router.post('/logout', async function (req, res, next) {
@@ -147,7 +146,6 @@ router.post('/', function (req, res, next) {
 
   user.save()
     .then(result => {
-      // console.log(result);
       res.status(201).json({ message: "succses", user: result });
     })
     .catch(err => {

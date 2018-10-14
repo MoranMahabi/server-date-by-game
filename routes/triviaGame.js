@@ -4,15 +4,43 @@ var router = express.Router();
 const mongoose = require('mongoose');
 
 const TriviaGame = require('../models/triviaGame');
+const Chat = require('../models/chat');
 
 var cors = require('cors')
 router.use(cors())
+
+router.post('/addApprovedChat/:gameID', async function (req, res) {
+    const gameID = req.params.gameID;
+    const triviaGame = await TriviaGame.findOne({ _id: gameID });
+    triviaGame.chatStatus++;
+
+    if (triviaGame.chatStatus == 3) {
+
+        let existChat = await Chat.findOne({
+            $or: [{ uid1: triviaGame.uidHost, uid2: triviaGame.uidGuest },
+            { uid2: triviaGame.uidHost, uid1: triviaGame.uidGuest }]
+        })
+
+        if (!existChat) {
+            chat = new Chat({
+                _id: new mongoose.Types.ObjectId(),
+                uid1: triviaGame.uidHost,
+                uid2: triviaGame.uidGuest
+            });
+            await chat.save();
+        }
+    }
+
+    await triviaGame.save();
+    res.sendStatus(200);
+});
 
 
 router.get('/finishGame/:gameID', async function (req, res) {
     const gameID = req.params.gameID;
     const triviaGame = await TriviaGame.findOne({ _id: gameID });
-    res.json({ finishGame: triviaGame.gameStatus == 3 });
+    const gameDetails = await triviaGame.getGameDetails();
+    res.json({ finishGame: triviaGame.gameStatus == 3, cards: gameDetails.cards, players: gameDetails.players });
 });
 
 router.post('/finishTurn/:gameID', async function (req, res) {

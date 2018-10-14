@@ -17,6 +17,8 @@ const CHAT_STATUS = {
     BOTH_APPROVED: 3
 }
 
+const NUMBER_QUESTIONS = 3;
+
 class TruthLieGame {
     static async create(
         uidHost,
@@ -50,37 +52,42 @@ class TruthLieGame {
         return array;
     }
 
+    async finishTurnHost(truthText, lieText) {
+        let texts = [];
 
-    async finishTurn(answer, cardIndex) {
+        texts[0] = {
+            text: truthText,
+            isTruth: true
+        }
 
+        texts[1] = {
+            text: lieText,
+            isTruth: false
+        }
 
-
-        console.log(answer)
-        console.log(cardIndex)
-        this.cards[cardIndex].answer = answer;
+        this.texts = TruthLieGame.shuffleArray(texts);
         this.currentPlayerUID = this.currentPlayerUID === this.uidHost ? this.uidGuest : this.uidHost;
-        let isFinish = true;
-        for (let card of this.cards) {
-            console.log(card.owner)
-            console.log(CARD_OWNER.NONE)
-            if (card.owner == CARD_OWNER.NONE) {
-                isFinish = false;
-                break;
-            }
-        }
 
-        console.log(isFinish)
-        if (isFinish) {
-            this.gameStatus = GAME_STATUS.FINISH;
-        }
-
-        this.isCardClicked = false;
         await this.save();
     }
 
-    async cardClicked(cardIndex) {
-        this.cards[cardIndex].owner = this.currentPlayerUID === this.uidHost ? CARD_OWNER.HOST : CARD_OWNER.GUEST;
-        this.isCardClicked = true;
+    async finishTurnGuest(isTrurh) {
+        if (isTrurh) {
+            this.guestScore++;
+        }
+
+        this.currentPlayerUID = this.currentPlayerUID === this.uidHost ? this.uidGuest : this.uidHost;
+
+        if (this.numberOfTurn == NUMBER_QUESTIONS) {
+            this.gameStatus = GAME_STATUS.FINISH;
+        } else {
+            this.numberOfTurn++
+            let texts = [];
+            texts.push({ text: "Waiting for the end of the opponent's turn...", isTruth: true });
+            texts.push({ text: "Waiting for the end of the opponent's turn...", isTruth: false });
+            this.texts = texts;
+        };
+
         await this.save();
     }
 
@@ -91,14 +98,16 @@ class TruthLieGame {
         const hostPlayer = {
             name: hostProfile.displayName,
             imageURL: hostProfile.imageMain,
-            uid: hostProfile.uid
+            uid: hostProfile.uid,
+            age: hostProfile.age
         }
 
         const guestProfile = await Profile.findOne({ uid: this.uidGuest });
         const guestPlayer = {
             name: guestProfile.displayName,
             imageURL: guestProfile.imageMain,
-            uid: guestProfile.uid
+            uid: guestProfile.uid,
+            age: guestProfile.age
         }
 
         players.push(hostPlayer);
@@ -106,13 +115,17 @@ class TruthLieGame {
 
         const currentPlayerUID = this.currentPlayerUID;
         const cards = this.cards;
-        const isCardClicked = this.isCardClicked;
+        const texts = this.texts;
+        const numberOfTurn = this.numberOfTurn;
+        const guestScore = this.guestScore;
 
         return {
             players: players,
             currentPlayerUID: currentPlayerUID,
-            cards: cards,
-            isCardClicked: isCardClicked
+            texts: texts,
+            guestScore: guestScore,
+            numberQuestions: NUMBER_QUESTIONS,
+            numberOfTurn: numberOfTurn
         }
     }
 }
@@ -120,7 +133,7 @@ class TruthLieGame {
 const Text = new Schema(
     {
         text: String,
-        isTrurh: Boolean,
+        isTruth: Boolean
     },
     {
         _id: false,
@@ -129,7 +142,7 @@ const Text = new Schema(
     }
 );
 
-const triviaGameSchema = mongoose.Schema(
+const truthLieGameSchema = mongoose.Schema(
     {
         _id: mongoose.Schema.Types.ObjectId,
         uidHost: String,
@@ -138,6 +151,8 @@ const triviaGameSchema = mongoose.Schema(
         chatStatus: { type: Number, default: CHAT_STATUS.NON_APPROVED },
         texts: { type: [Text], default: [] },
         currentPlayerUID: String,
+        numberOfTurn: { type: Number, default: 1 },
+        guestScore: { type: Number, default: 0 }
     }, {
         collection: 'truthLieGame',
         timestamps: {

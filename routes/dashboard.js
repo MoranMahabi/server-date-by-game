@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Profile = require('../models/profile');
 const TriviaGame = require('../models/triviaGame');
 const ConcentrationGame = require('../models/concentrationGame');
+const TruthLieGame = require('../models/truthLieGame');
 const Chat = require('../models/chat');
 
 var cors = require('cors')
@@ -14,6 +15,7 @@ router.use(cors())
 const GAME_TYPE = {
     TRIVIA: 1,
     CONCENTRATION: 2,
+    TRUTH_LIE: 3
 }
 
 router.get('/declinedGame/:id/:type', async function (req, res) {
@@ -26,6 +28,8 @@ router.get('/declinedGame/:id/:type', async function (req, res) {
         game = await TriviaGame.findOne({ _id: id });
     } else if (type == GAME_TYPE.CONCENTRATION) {
         game = await ConcentrationGame.findOne({ _id: id });
+    } else if (type == GAME_TYPE.TRUTH_LIE) {
+        game = await TruthLieGame.findOne({ _id: id });
     }
 
     game.gameStatus = 4;
@@ -43,6 +47,8 @@ router.get('/approvedGame/:id/:type', async function (req, res) {
         game = await TriviaGame.findOne({ _id: id });
     } else if (type == GAME_TYPE.CONCENTRATION) {
         game = await ConcentrationGame.findOne({ _id: id });
+    } else if (type == GAME_TYPE.TRUTH_LIE) {
+        game = await TruthLieGame.findOne({ _id: id });
     }
 
     game.gameStatus = 2;
@@ -54,10 +60,12 @@ router.get('/incomingGames/:uid', async function (req, res) {
     const uid = req.params.uid;
     const trivaGames = await TriviaGame.find({ gameStatus: 1, uidGuest: uid });
     const concentrationGames = await ConcentrationGame.find({ gameStatus: 1, uidGuest: uid });
+    const truthLieGames = await TruthLieGame.find({ gameStatus: 1, uidGuest: uid });
 
     let games = [];
     games = games.concat(trivaGames.map((item) => { return { ...item._doc, type: GAME_TYPE.TRIVIA } }));
     games = games.concat(concentrationGames.map((item) => { return { ...item._doc, type: GAME_TYPE.CONCENTRATION } }));
+    games = games.concat(truthLieGames.map((item) => { return { ...item._doc, type: GAME_TYPE.TRUTH_LIE } }));
 
     let result = [];
 
@@ -85,10 +93,12 @@ router.get('/activeGames/:uid', async function (req, res) {
     const uid = req.params.uid;
     const trivaGames = await TriviaGame.find({ gameStatus: 2, $or: [{ uidHost: uid }, { uidGuest: uid }] });
     const concentrationGames = await ConcentrationGame.find({ gameStatus: 2, $or: [{ uidHost: uid }, { uidGuest: uid }] });
+    const truthLieGames = await TruthLieGame.find({ gameStatus: 2, $or: [{ uidHost: uid }, { uidGuest: uid }] });
 
     let games = [];
     games = games.concat(trivaGames.map((item) => { return { ...item._doc, type: GAME_TYPE.TRIVIA } }));
     games = games.concat(concentrationGames.map((item) => { return { ...item._doc, type: GAME_TYPE.CONCENTRATION } }));
+    games = games.concat(truthLieGames.map((item) => { return { ...item._doc, type: GAME_TYPE.TRUTH_LIE } }));
 
     let result = [];
 

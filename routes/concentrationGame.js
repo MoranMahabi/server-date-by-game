@@ -15,8 +15,7 @@ router.post('/addApprovedChat/:gameID', async function (req, res) {
     concentrationGame.chatStatus++;
 
     if (concentrationGame.chatStatus == 3) {
-
-        let existChat = Chat.findOne({
+        let existChat = await Chat.findOne({
             $or: [{ uid1: concentrationGame.uidHost, uid2: concentrationGame.uidGuest },
             { uid2: concentrationGame.uidHost, uid1: concentrationGame.uidGuest }]
         })
@@ -46,7 +45,7 @@ router.get('/finishGame/:gameID', async function (req, res) {
 router.post('/cardClicked/:gameID', async function (req, res) {
     const gameID = req.params.gameID;
     const concentrationGame = await ConcentrationGame.findOne({ _id: gameID });
-    concentrationGame.cardClicked(req.body.cardIndex);
+    await concentrationGame.cardClicked(req.body.cardIndex);
     res.sendStatus(200);
 });
 

@@ -24,7 +24,7 @@ const CARD_OWNER = {
     GUEST: 3
 }
 
-const NUMBER_CARDS = 7;
+const NUMBER_CARDS = 5;
 
 class TriviaGame {
     static async create(
@@ -68,24 +68,15 @@ class TriviaGame {
 
 
     async finishTurn(answer, cardIndex) {
-
-
-
-        console.log(answer)
-        console.log(cardIndex)
         this.cards[cardIndex].answer = answer;
         this.currentPlayerUID = this.currentPlayerUID === this.uidHost ? this.uidGuest : this.uidHost;
         let isFinish = true;
         for (let card of this.cards) {
-            console.log(card.owner)
-            console.log(CARD_OWNER.NONE)
             if (card.owner == CARD_OWNER.NONE) {
                 isFinish = false;
                 break;
             }
         }
-
-        console.log(isFinish)
         if (isFinish) {
             this.gameStatus = GAME_STATUS.FINISH;
         }

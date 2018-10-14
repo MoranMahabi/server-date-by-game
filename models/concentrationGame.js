@@ -38,10 +38,10 @@ class ConcentrationGame {
         const guestProfile = await Profile.findOne({ uid: uidGuest });
 
 
-        const hostImageList = hostProfile.imageList;
-        const guestImageList = guestProfile.imageList;
-        //const hostImageList = this.shuffleArray(hostProfile.imageList);
-        // const guestImageList = this.shuffleArray(guestProfile.imageList);
+        // const hostImageList = hostProfile.imageList;
+        // const guestImageList = guestProfile.imageList;
+        const hostImageList = this.shuffleArray(hostProfile.imageList);
+        const guestImageList = this.shuffleArray(guestProfile.imageList);
 
         for (let i = 0; i < 3; i++) {
             let uuid = uuidv4();
@@ -72,8 +72,8 @@ class ConcentrationGame {
             })
         }
 
-        gameConcentration.cards = cards;
-        //gameConcentration.cards = this.shuffleArray(cards);
+        //gameConcentration.cards = cards;
+        gameConcentration.cards = this.shuffleArray(cards);
         gameConcentration.currentPlayerUID = uidHost;
         return gameConcentration;
     }
@@ -88,6 +88,10 @@ class ConcentrationGame {
         return array;
     }
 
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async cardClicked(cardIndex) {
         if (this.firstCardIndex == -1 && this.secondCardIndex == -1) {
             this.firstCardIndex = cardIndex;
@@ -99,10 +103,12 @@ class ConcentrationGame {
         if (this.secondCardIndex == -1) {
             this.secondCardIndex = cardIndex;
             this.cards[cardIndex].isFacingUP = true;
+            await this.save();
         }
 
+
         if (this.cards[this.firstCardIndex].id != this.cards[this.secondCardIndex].id) {
-            // setTimeOut
+            await this.sleep(1500);
             this.cards[this.firstCardIndex].isFacingUP = false;
             this.cards[this.secondCardIndex].isFacingUP = false;
             this.currentPlayerUID = this.currentPlayerUID === this.uidHost ? this.uidGuest : this.uidHost;

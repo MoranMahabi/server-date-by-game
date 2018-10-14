@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var uploadRouter = require('./routes/upload');
 var triviaGameRouter = require('./routes/triviaGame');
 var concentrationGameRouter = require('./routes/concentrationGame');
+var truthLieGameRouter = require('./routes/truthLieGame');
 var chatRouter = require('./routes/chat');
 var dashboardRouter = require('./routes/dashboard');
 
@@ -56,6 +57,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/upload', uploadRouter);
 app.use('/triviaGame', triviaGameRouter);
+app.use('/truthLieGame', truthLieGameRouter);
 app.use('/concentrationGame', concentrationGameRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/chat', chatRouter);
